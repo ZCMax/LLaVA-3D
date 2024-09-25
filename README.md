@@ -40,7 +40,7 @@ LLaVA-3D Architecture. Based on LLaVA, we directly add the corresponding 3D posi
 
 ## 🛠️ Requirements and Installation
 * Python >= 3.10
-* Pytorch == 2.0.1
+* Pytorch == 2.1.0
 * CUDA Version >= 11.7
 * Install required packages:
 ```bash
