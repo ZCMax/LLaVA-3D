@@ -1,6 +1,6 @@
 <br>
 <p align="center">
-<h1 align="center"><strong>LLaVA-3D: A Simple yet Effective Pathway to Empowering LLaVA to understand and interact with 3D world</strong></h1>
+<h1 align="center"><strong>LLaVA-3D: A Simple yet Effective Pathway to Empowering LMMs with 3D-awareness</strong></h1>
   <p align="center">
 	<br>
     <a href='https://zcmax.github.io//' target='_blank'>Chenming Zhu</a>&emsp;
@@ -53,48 +53,6 @@ pip install flash-attn --no-build-isolation
 pip install git+https://github.com/facebookresearch/pytorch3d.git@stablegit@28fe037d212663c6a24f373b94cc5d478c8c1a1d
 pip install torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 ```
-
-## Instruction Tuning
-
-### 1. Prepare data
-
-```
-# link the json annotations
-ln -s /mnt/petrelfs/share_data/zhuchenming/scannet/annotations ./playground/data/annotations
-# link the posed RGB-D data
-ln -s /mnt/petrelfs/share_data/zhuchenming/scannet/frames_odin ./playground/data/LLaVA-3D-Pretrain/frames/scannet
-```
-
-### 2. Download CLIP weights
-
-Download the CLIP weights [https://huggingface.co/openai/clip-vit-large-patch14-336/tree/main] and put under `openai/clip-vit-large-patch14-336`.
-
-
-### 3. Instrunction Tuning (LoRA)
-
-During training procedure, it will automatically download the llava-v1.5-7b model.
-
-```
-./scripts/v1_5/finetune_3d_task_lora.sh
-```
-
-### 4. Merge lora weights
-
-After tuning procedure, the lora weights and trainable model weights will be saved under the `output_dir`, which is specified in `finetune_3d_task_lora.sh` script.
-
-You need to merge the lora weights and the original llava-v1.5-7b model.
-
-```
-python scripts/merge_lora_weights.py \
-    --model-path ./checkpoints/llava3d-7b-task-lora \
-    --model-base liuhaotian/llava-v1.5-7b \
-    --save-model-path ./checkpoints/llava3d-7b-task-lora/merged/llava3d-v1.5-7b-task
-```
-
-The mereged weights has been put under `/mnt/petrelfs/share_data/zhuchenming/llava3d-7b-task-lora/merged/llava3d-v1.5-7b-task`
-
-
-### 5. Evaluation
 
 #### demo inference
 
