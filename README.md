@@ -69,7 +69,7 @@ pip install torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 pip install -e .
 ```
 
-3. Download the [camera parameters file](https://huggingface.co/liuhaotian/llava-v1.5-7) and put it under the `./playground/data/annotations`.
+3. Download the [Camera Parameters File](https://drive.google.com/file/d/1a-1MCFLkfoXNgn9XdlmS9Gnzplrzw7vf/view?usp=drive_link) and put the json file under the `./playground/data/annotations`.
 
 4. Install additional packages for training cases
 
@@ -98,6 +98,8 @@ python llava/eval/run_llava_3d.py \
 
 ### 3D Tasks
 
+We provide the demo scene [here](https://huggingface.co/datasets/ChaimZhu/LLaVA-3D-Demo-Data). Download the demo data and put it under the `./demo`.
+
 1. 3D Question Answering
 
 ```Shell
@@ -112,8 +114,8 @@ python llava/eval/run_llava_3d.py \
 ```Shell
 python llava/eval/run_llava_3d.py \
     --model-path ChaimZhu/LLaVA-3D-7B \
-    --video-path ./demo/3rscan/3rscan0370 \
-    --query "The related object is located at [-0.283, -0.817, 0.275]. Describe the object in detail."
+    --video-path ./demo/scannet/scene0566_00 \
+    --query "The related object is located at [0.981, 1.606, 0.430]. Describe the object in detail."
 ```
 
 3. 3D Localization
