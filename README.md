@@ -31,21 +31,29 @@
 </div>
 LLaVA-3D could perform both 2D and 3D vision-language tasks. The left block (b) shows that compared with previous 3D LMMs, our LLaVA-3D achieves state-of-the-art performance across a wide range of 3D benchmarks while maintaining a comparable performance on various 2D benchmarks compared with LLaVA-1.5. The middle block (c) demonstrates that LLaVA-3D is built on the 2D LMM: LLaVA, and leverages 3D patches to endow it with 3D spatial awareness, enabling it to perform various 3D vision-and-language tasks in the physical world. The right blocks (d) and (e) highlights the significantly faster convergence and inference speeds of LLaVA-3D compared to existing 3D LMMs.
 
+## 🔥 News
+- [2024-10-19] We release the inference codes with checkpoints as well as the image and 3D scene demos. You can chat with LLaVA-3D with your own machines.
+- [2024-09-28] We release the [paper](https://arxiv.org/abs/2409.18125) of LLaVA-3D. &#x1F389;
 
-## Contents
-- [Model Architecture](#model-architecture)
-- [Install](#install)
-- [Model Zoo](#model-zoo)
-- [Demo](#Demo)
+<!-- contents with emoji -->
+## 📋 Contents
+- [🔍 Model Architecture](#-model-architecture)
+- [🔨 Install](#-install)
+- [📦 Model Zoo](#-model-zoo)
+- [🤖 Demo](#-demo)
+- [📝 TODO List](#-todo-list)
+- [🔗 Citation](#-citation)
+- [📄 License](#-license)
+- [👏 Acknowledgements](#-acknowledgements)
 
-## Model Architecture
+## 🔍 Model Architecture
 <p align="center">
   <img src="assets/llava-3d-method-v13.png" align="center" width="100%">
 </p>
 LLaVA-3D Architecture. Based on LLaVA, we directly add the corresponding 3D position embeddings to 2D patch visual tokens of multi-view images to construct the 3D Patches, then the 3D Patches will undergo 3D pooling and be sent into the projection layer of LLaVA to map into the LLM space and align with the LLM using 3D-visual-language data.
 
 
-## Install
+## 🔨 Install
 We test our codes under the following environment:
 * Python 3.10
 * Pytorch 2.1.0
@@ -79,11 +87,11 @@ pip install flash-attn --no-build-isolation
 ```
 
 
-## Model Zoo
+## 📦 Model Zoo
 
 The trained model checkpoints are available [here](https://huggingface.co/ChaimZhu/LLaVA-3D-7B). Currently we only provide the 7B model, and we will continue to update the model zoo.
 
-## Demo
+## 🤖 Demo
 
 We currently support single image as inputs for 2D tasks and posed RGB-D images as inputs for 3D tasks. You can run the demo by using the script `llava/eval/run_llava_3d.py`. For 2D tasks, use the `image-file` parameter, and for 3D tasks, use the `video-path` parameter to provide the corresponding data. Here, we provide some demos as examples:
 
@@ -131,9 +139,23 @@ python llava/eval/run_llava_3d.py \
 ## 📝 TODO List
 
 - \[x\] Release the training and inference code.
-- \[x\] Release the checkpoint and simple demo.
+- \[x\] Release the checkpoint, demo data and script.
 - \[ \] Release gradio demo.
-- \[ \] Release the datasets.
+- \[ \] Release the evaluation script.
+- \[ \] Release the training and evaluation datasets.
+
+## 🔗 Citation
+
+If you find our work and this codebase helpful, please consider starring this repo 🌟 and cite:
+
+```bibtex
+@article{zhu2024llava,
+  title={LLaVA-3D: A Simple yet Effective Pathway to Empowering LMMs with 3D-awareness},
+  author={Zhu, Chenming and Wang, Tai and Zhang, Wenwei and Pang, Jiangmiao and Liu, Xihui},
+  journal={arXiv preprint arXiv:2409.18125},
+  year={2024}
+}
+```
 
 ## 📄 License
 
