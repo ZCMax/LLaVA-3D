@@ -4,7 +4,6 @@ import torch.nn as nn
 from .video_processor import RGBDVideoProcessor
 from .spatial_aware_module import SpatialAwareModule
 from .unproject import backprojector_dataloader, voxelize
-from pytorch3d.ops import sample_farthest_points
 from torch_scatter import scatter_mean
 from .position_encodings import PositionEmbeddingLearnedMLP
 
@@ -80,14 +79,8 @@ class RGBDVideoTower(nn.Module):
         video_xyz = feat_xyz.reshape(B, V*H*W, 3)
         if lengths is not None:
             lengths = lengths*H*W
-        if self.pooling == 'fps':
-            if self.num_sample_tokens < video_features.shape[1]:
-                _, indexs = sample_farthest_points(video_xyz, lengths=lengths, K=self.num_sample_tokens)
-                pooled_video_features = torch.gather(video_features, 1, indexs.unsqueeze(2).expand(B, self.num_sample_tokens, C))
-            else:
-                pooled_video_features = video_features
-            batch_offset = None
-        elif self.pooling == 'voxelize':
+
+        if self.pooling == 'voxelize':
             p2v = voxelize(feat_xyz, self.voxel_size)  # （B, N)
             pooled_video_features = torch.cat([scatter_mean(video_features[b], p2v[b], dim=0) for b in range(len(video_features))]) # bn, F
             batch_offset = ((p2v).max(1)[0] + 1).cumsum(0).to(torch.int32)

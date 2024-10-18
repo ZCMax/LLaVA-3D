@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "llava"
-version = "1.2.2.post1"
-description = "Towards GPT-4 like large language and visual assistant."
+name = "llava-3d"
+version = "1.0.0"
+description = "A Simple yet Effective Pathway to Empowering LMMs with 3D-awareness."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -13,14 +13,12 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
-    "torch==2.1.0", "torchvision==0.16.0",
     "transformers==4.37.2", "tokenizers==0.15.1", "sentencepiece==0.1.99", "shortuuid",
     "accelerate==0.21.0", "peft", "bitsandbytes",
     "pydantic", "markdown2[all]", "numpy", "scikit-learn==1.2.2",
-    "gradio==4.16.0", "gradio_client==0.8.1",
-    "requests", "httpx==0.24.0", "uvicorn", "fastapi",
-    "einops==0.6.1", "einops-exts==0.0.4", "timm==0.6.13", "git+https://github.com/facebookresearch/pytorch3d.git@stable",
-    "torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html"
+    "gradio==4.29.0", "gradio_client==0.16.1",
+    "requests", "httpx==0.27.0", "uvicorn", "fastapi",
+    "einops==0.6.1", "einops-exts==0.0.4", "timm==0.6.13", "opencv-python", "protobuf"
 ]
 
 [project.optional-dependencies]

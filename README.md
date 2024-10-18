@@ -18,7 +18,7 @@
 <div id="top" align="center">
 
 [![llava_3d-project_page](https://img.shields.io/badge/llava_3d-project_page-red)](https://zcmax.github.io/projects/LLaVA-3D/) 
-[![llava_3d-checkpoints](https://img.shields.io/badge/llava_3d-checkpoints-blue)](https://zcmax.github.io/projects/LLaVA-3D/)
+[![llava_3d-checkpoints](https://img.shields.io/badge/llava_3d-checkpoints-blue)](https://huggingface.co/ChaimZhu/llava-3d-7b)
 
 </div>
 
@@ -31,78 +31,107 @@
 </div>
 LLaVA-3D could perform both 2D and 3D vision-language tasks. The left block (b) shows that compared with previous 3D LMMs, our LLaVA-3D achieves state-of-the-art performance across a wide range of 3D benchmarks while maintaining a comparable performance on various 2D benchmarks compared with LLaVA-1.5. The middle block (c) demonstrates that LLaVA-3D is built on the 2D LMM: LLaVA, and leverages 3D patches to endow it with 3D spatial awareness, enabling it to perform various 3D vision-and-language tasks in the physical world. The right blocks (d) and (e) highlights the significantly faster convergence and inference speeds of LLaVA-3D compared to existing 3D LMMs.
 
-## 📦 LLaVA-3D Architecture
+
+## Contents
+- [Model Architecture](#model-architecture)
+- [Install](#install)
+- [Model Zoo](#model-zoo)
+- [Demo](#Demo)
+
+## Model Architecture
 <p align="center">
   <img src="assets/llava-3d-method-v13.png" align="center" width="100%">
 </p>
 LLaVA-3D Architecture. Based on LLaVA, we directly add the corresponding 3D position embeddings to 2D patch visual tokens of multi-view images to construct the 3D Patches, then the 3D Patches will undergo 3D pooling and be sent into the projection layer of LLaVA to map into the LLM space and align with the LLM using 3D-visual-language data.
 
 
-## 🛠️ Requirements and Installation
-* Python >= 3.10
-* Pytorch == 2.1.0
-* CUDA Version >= 11.7
-* Install required packages:
+## Install
+We test our codes under the following environment:
+* Python 3.10
+* Pytorch 2.1.0
+* CUDA Version 11.8
+
+To start: 
+1. Clone this repository.
+
 ```bash
-conda create -n llava python=3.10 -y
-conda activate llava
-pip install --upgrade pip  # enable PEP 660 support
+git clone https://github.com/ZCMax/LLaVA-3D.git
+cd LLaVA-3D
+```
+
+2. Install Packages
+
+```Shell
+conda create -n llava-3d python=3.10 -y
+conda activate llava-3d
+pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+pip install torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 pip install -e .
+```
+
+3. Download the [camera parameters file](https://huggingface.co/liuhaotian/llava-v1.5-7) and put it under the `./playground/data/annotations`.
+
+4. Install additional packages for training cases
+
+```Shell
 pip install -e ".[train]"
 pip install flash-attn --no-build-isolation
-pip install git+https://github.com/facebookresearch/pytorch3d.git@stablegit@28fe037d212663c6a24f373b94cc5d478c8c1a1d
-pip install torch-scatter -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
 ```
 
-#### demo inference
 
-You can use the fine-tuned model to infrence on the scene rgbd video on a single GPU:
+## Model Zoo
 
+The trained model checkpoints are available [here](https://huggingface.co/ChaimZhu/LLaVA-3D-7B). Currently we only provide the 7B model, and we will continue to update the model zoo.
+
+## Demo
+
+We currently support single image as inputs for 2D tasks and posed RGB-D images as inputs for 3D tasks. You can run the demo by using the script `llava/eval/run_llava_3d.py`. For 2D tasks, use the `image-file` parameter, and for 3D tasks, use the `video-path` parameter to provide the corresponding data. Here, we provide some demos as examples:
+
+### 2D Tasks
+
+```Shell
+python llava/eval/run_llava_3d.py \
+    --model-path ChaimZhu/LLaVA-3D-7B \
+    --image-file https://llava-vl.github.io/static/images/view.jpg \
+    --query "What are the things I should be cautious about when I visit here?"
 ```
-./inference.sh
+
+### 3D Tasks
+
+1. 3D Question Answering
+
+```Shell
+python llava/eval/run_llava_3d.py \
+    --model-path ChaimZhu/LLaVA-3D-7B \
+    --video-path ./demo/scannet/scene0356_00 \
+    --query "Tell me the only object that I could see from the other room and describe the object."
 ```
 
-#### multi-gpu evaluation
+2. 3D Dense Captioning
 
-Since current the `batch_size` during inference is fixed to be `1` due to some reason. To accelereate the evaluation speed, we now provide the the script of multi-gpu inference on SLURM.
-
-```bash
-bash eval_multiprocess_mmscan_qa_slurm.sh
+```Shell
+python llava/eval/run_llava_3d.py \
+    --model-path ChaimZhu/LLaVA-3D-7B \
+    --video-path ./demo/3rscan/3rscan0370 \
+    --query "The related object is located at [-0.283, -0.817, 0.275]. Describe the object in detail."
 ```
 
-You can simply modify it to run on the local device (non-slurm environment).
+3. 3D Localization
 
-## Finetune LLaVA-3D on Custom Datasets
-
-Convert your data to a JSON file of a List of all samples. Sample metadata should contain `id` (a unique identifier), `video` (the path to the video), and `conversations` (the conversation data between human and AI).
-
-A sample JSON for finetuning LLaVA-3D for generating 3D scene caption.
-
-```json
-[
-    {
-        "id": 0,
-        "video": "frames/scannet/scene0442_00",
-        "conversations": [
-            {
-                "from": "human",
-                "value": "<video>\nDescribe the room concisely."
-            },
-            {
-                "from": "gpt",
-                "value": "In the opulent living room, adorned with four chairs, four tables, and five armchairs, a symphony of elegance unfolds. The chairs, positioned in front of the tables, create an inviting space for conversation and relaxation. The tables, in turn, stand proudly behind the chairs, offering a surface for books, drinks, or cherished mementos. The armchairs, scattered throughout the room, beckon weary souls to sink into their plush embrace. This living room exudes comfort and sophistication, a sanctuary for both solitary contemplation and convivial gatherings."
-            }
-        ]
-    },
-  ...
-]
+```Shell
+python llava/eval/run_llava_3d.py \
+    --model-path ChaimZhu/LLaVA-3D-7B \
+    --video-path ./demo/scannet/scene0382_01 \
+    --query "The related object is located at [-0.085,1.598,1.310]. Please output the 3D bounding box of the object and then describe the object."
 ```
+
 
 ## 📝 TODO List
 
-- \[x\] Release training and inference code.
+- \[x\] Release the training and inference code.
+- \[x\] Release the checkpoint and simple demo.
 - \[ \] Release gradio demo.
-- \[ \] Release checkpoints and datasets.
+- \[ \] Release the datasets.
 
 ## 📄 License
 
@@ -112,4 +141,4 @@ This work is under the <a rel="license" href="http://creativecommons.org/license
 
 ## 👏 Acknowledgements
 
-This repo benefits from [3D-LLM](https://github.com/UMass-Foundation-Model/3D-LLM), [LLaVA](https://github.com/haotian-liu/LLaVA). 
+This repo benefits from [3D-LLM](https://github.com/UMass-Foundation-Model/3D-LLM), [LLaVA](https://github.com/haotian-liu/LLaVA), and [ODIN](https://github.com/ayushjain1144/odin). 

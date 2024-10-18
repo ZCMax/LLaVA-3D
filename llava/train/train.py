@@ -23,7 +23,7 @@ import pathlib
 from typing import Dict, Optional, Sequence, List
 
 import torch
-
+import numpy as np
 import transformers
 import tokenizers
 
@@ -394,7 +394,14 @@ def preprocess_target_prompts(
             boxes = target['boxes']
             clicks = []
             for box in boxes:
-                click = [round(coord, 3) for coord in box[:3]]
+                if len(box) == 6:
+                    delta_x = np.random.uniform(-box[3]/2, box[3]/2)
+                    delta_y = np.random.uniform(-box[4]/2, box[4]/2)
+                    delta_z = np.random.uniform(-box[5]/2, box[5]/2)
+                    click = [box[0]+delta_x, box[1]+delta_y, box[2]+delta_z]
+                    click = [round(coord, 3) for coord in click]
+                elif len(box) == 9:
+                    click = [round(coord, 3) for coord in box[:3]]
                 clicks.append(click)
         else:
             clicks = []
@@ -880,58 +887,33 @@ class DataCollatorForSupervisedDataset(object):
         )
         
         # ==========Too many videos or images may lead to OOM, so we encode them one by one======================
+        # [
+        #     image(3, 336, 336),      # sample 1
+        #     image(3, 336, 336),      # sample 2
+        #     video(20, 3, 336, 336),  # sample 3
+        #     image(3, 336, 336),      # sample 4
+        #     video(20, 3, 336, 336),   # sample 5
+        #     video(20, 3, 336, 336),   # sample 6
+        # ]
         if 'image' in instances[0]:
             images = [instance['image'] for instance in instances]
-            if all(x is not None and x.shape == images[0].shape for x in images):  
-                batch['images'] = torch.stack(images)  # (B, V, C, H, W)
-            else:
-                max_view = max([image.size(0) for image in images])
-                padded_images = []
-                lengths = []
-                for image in images:
-                    view = image.size(0)
-                    pad_view = max_view - view
-                    if pad_view > 0:
-                        padded_image = torch.cat([image, torch.zeros(pad_view, 3, 336, 336).to(image.device)], dim=0)
-                    else:
-                        padded_image = image
-                    padded_images.append(padded_image)
-                    lengths.append(view)
-                batch['images'] = torch.stack(padded_images) # (B, V, C, H, W)
-                batch['lengths'] = torch.tensor(lengths).to(batch['images'].device) # (B, )
+            batch['images'] = images
         
-        if 'depth' in instances[0]:
+        instances = [instance for instance in instances if 'depth' in instance]  # find the video data
+        if len(instances) > 0:  # exist video data in the batch data
             depths = [instance['depth'] for instance in instances]
             poses = [instance['pose'] for instance in instances]
             intrinsics = [instance['intrinsic'] for instance in instances]
+            batch['depths'] = torch.stack(depths)  # (mini_b_2, V, H, W)
+            batch['poses'] = torch.stack(poses)  # (mini_b_2, V, 4, 4)
+            batch['intrinsics'] = torch.stack(intrinsics)  # (mini_b_2, 4, 4)
+
             clicks = []
             for instance in instances:
                 clicks.extend(instance['clicks'])
             clicks = torch.tensor(clicks)  # (num_clicks, 3)
-            if clicks.numel() == 0:  # empty tensor
-                clicks = torch.zeros((0, 3))  # pseudo clicks
-            if all(x is not None and x.shape == images[0].shape for x in images):  
-                batch['depths'] = torch.stack(depths)  # (B, V, H, W)
-                batch['poses'] = torch.stack(poses)  # (B, V, 4, 4)
-                batch['intrinsics'] = torch.stack(intrinsics)  # (B, 4, 4)
-            else:
-                padded_depths = []
-                padded_poses = []
-                for depth, pose in zip(depths, poses):
-                    view = depth.size(0)
-                    pad_view = max_view - view
-                    if pad_view > 0:
-                        padded_depth = torch.cat([depth, torch.zeros(pad_view, 336, 336).to(depth.device)], dim=0)
-                        padded_pose = torch.cat([pose, torch.eye(4).unsqueeze(0).repeat(pad_view, 1, 1).to(pose.device)], dim=0)
-                    else:
-                        padded_depth = depth
-                        padded_pose = pose
-                    padded_depths.append(padded_depth)
-                    padded_poses.append(padded_pose)
-                batch['depths'] = torch.stack(padded_depths) # (B, V, H, W)
-                batch['poses'] = torch.stack(padded_poses)  # (B, V, 4, 4)
-                batch['intrinsics'] = torch.stack(intrinsics) # (B, 4, 4)
-            batch['clicks'] = clicks  # (num_clicks, 3)
+            if clicks.numel() != 0:  # valid tensor
+                batch['clicks'] = clicks  # (num_clicks, 3)
 
         return batch
 

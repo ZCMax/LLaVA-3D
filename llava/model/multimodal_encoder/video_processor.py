@@ -6,32 +6,9 @@ from PIL import Image
 import os
 import torch
 from torch import Tensor
-import clip
-import mmengine
+import json
 import cv2
 from scipy.spatial.transform import Rotation as R
-
-def cos_sim(a: Tensor, b: Tensor) -> Tensor:
-    """
-    Computes the cosine similarity cos_sim(a[i], b[j]) for all i and j.
-
-    :return: Matrix with res[i][j]  = cos_sim(a[i], b[j])
-    """
-    if not isinstance(a, torch.Tensor):
-        a = torch.tensor(a)
-
-    if not isinstance(b, torch.Tensor):
-        b = torch.tensor(b)
-
-    if len(a.shape) == 1:
-        a = a.unsqueeze(0)
-
-    if len(b.shape) == 1:
-        b = b.unsqueeze(0)
-
-    a_norm = torch.nn.functional.normalize(a, p=2, dim=1)
-    b_norm = torch.nn.functional.normalize(b, p=2, dim=1)
-    return torch.mm(a_norm, b_norm.transpose(0, 1))
 
 
 class RGBDVideoProcessor(ProcessorMixin):
@@ -81,7 +58,9 @@ class RGBDVideoProcessor(ProcessorMixin):
         self.image_processor = CLIPImageProcessor.from_pretrained(self.vision_tower_name)
         self.tokenizer = tokenizer
         self.num_frames = num_frames
-        self.scene = mmengine.load('embodiedscan_infos_full_llava3d_v2.json')
+
+        with open('/ssd/zhuchenming/annotations/embodiedscan_infos_full_llava3d_v2.json', 'r') as file:
+            self.scene = json.load(file)
 
     def valid_pose(self, video_poses):
         valid_video_poses = []
@@ -102,49 +81,6 @@ class RGBDVideoProcessor(ProcessorMixin):
         depth_inpaint = cv2.inpaint(depth, (depth == 0).astype(np.uint8), 5, cv2.INPAINT_NS)
         depth[depth == 0] = depth_inpaint[depth == 0]
         return depth
-
-    def clip_subsample_frames(self, video, device, text):
-        r"""
-        Actually we may need to adapt this function for different datasets
-        """ 
-        model, preprocess = clip.load("ViT-B/32", device=device)
-        if 'scannet' in video:
-            image_path = Path(video) / 'color'
-            video_frames = sorted(image_path.glob("*.png"))  # find all the color frames of the rgbd video
-            video_poses = [str(video_frame).replace('color', 'pose').replace('png', 'txt') for video_frame in video_frames]
-            assert len(video_frames) == len(video_poses)
-            valid_video_poses = self.valid_pose(video_poses)
-            valid_images = [video_pose.replace('pose', 'color').replace('txt', 'png')  for video_pose in valid_video_poses]
-            images = []
-            for image_path in valid_images: 
-                image = preprocess(Image.open(image_path)).to(device)
-                images.append(image)
-            images = torch.stack(images)
-            text = clip.tokenize([text]).to(device)
-            with torch.no_grad():
-                image_features = model.encode_image(images)
-                text_features = model.encode_text(text)
-                #Compute cosine similarities 
-                cos_scores = cos_sim(image_features, text_features).squeeze(-1)  # (sample)
-                k = min(self.num_frames, len(images))
-                _, top_indices = cos_scores.topk(k)
-                sample_images = [valid_images[i] for i in top_indices.tolist()]
-            
-            sample_poses = [sample_image.replace('color', 'pose').replace('png', 'txt') for sample_image in sample_images]
-            sample_depths = [sample_image.replace('color', 'depth_inpainted') for sample_image in sample_images]
-            depth_intrinsic_file = os.path.join(video, 'intrinsic/intrinsic_depth.txt')
-            axis_align_matrix_file = os.path.join(video, 'axis_align_matrix.txt')
-
-            video_info = dict()
-            video_info['sample_image_files'] = sample_images
-            video_info['sample_depth_image_files'] = sample_depths
-            video_info['sample_pose_files'] = sample_poses
-            video_info['depth_intrinsic_file'] = depth_intrinsic_file
-            video_info['axis_align_matrix_file'] = axis_align_matrix_file
-        else:
-            raise NotImplementedError
-
-        return video_info
 
     def extract_frames(self, frames):
         
@@ -436,8 +372,6 @@ class RGBDVideoProcessor(ProcessorMixin):
         elif 'frames' in video:  # scene-based odin data
             if mode == 'random':
                 video_info = self.subsample_frames(video)
-            elif mode == 'clip':
-                video_info = self.clip_subsample_frames(video, device, text)
             else:
                 raise NotImplementedError
         elif 'openscan' in video:
