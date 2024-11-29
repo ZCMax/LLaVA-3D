@@ -32,6 +32,7 @@
 LLaVA-3D could perform both 2D and 3D vision-language tasks. The left block (b) shows that compared with previous 3D LMMs, our LLaVA-3D achieves state-of-the-art performance across a wide range of 3D benchmarks while maintaining a comparable performance on various 2D benchmarks compared with LLaVA-1.5. The middle block (c) demonstrates that LLaVA-3D is built on the 2D LMM: LLaVA, and leverages 3D patches to endow it with 3D spatial awareness, enabling it to perform various 3D vision-and-language tasks in the physical world. The right blocks (d) and (e) highlights the significantly faster convergence and inference speeds of LLaVA-3D compared to existing 3D LMMs.
 
 ## 🔥 News
+- [2024-11-29] We update the custom data instruction tuning tutorial, now you can train the model on your own dataset!
 - [2024-10-19] We release the inference codes with checkpoints as well as the image and 3D scene demos. You can chat with LLaVA-3D with your own machines.
 - [2024-09-28] We release the [paper](https://arxiv.org/abs/2409.18125) of LLaVA-3D. &#x1F389;
 
