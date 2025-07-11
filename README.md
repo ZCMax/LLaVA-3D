@@ -153,9 +153,8 @@ python llava/eval/run_llava_3d.py \
 
 - \[x\] Release the training and inference code.
 - \[x\] Release the checkpoint, demo data and script.
-- \[ \] Release gradio demo.
-- \[ \] Release the evaluation script.
-- \[ \] Release the training and evaluation datasets.
+- \[x\] Release the training datasets.
+- \[ \] Release the full code.
 
 ## 🔗 Citation
 
