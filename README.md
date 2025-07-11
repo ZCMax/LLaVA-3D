@@ -17,8 +17,19 @@
 
 <div id="top" align="center">
 
-[![llava_3d-project_page](https://img.shields.io/badge/llava_3d-project_page-red)](https://zcmax.github.io/projects/LLaVA-3D/) 
-[![llava_3d-checkpoints](https://img.shields.io/badge/llava_3d-checkpoints-blue)](https://huggingface.co/ChaimZhu/llava-3d-7b)
+<a href="https://arxiv.org/abs/2409.18125" target="_blank">
+    <img alt="arXiv" src="https://img.shields.io/badge/arXiv-LLaVA--3D-red?logo=arxiv" height="20" />
+</a>
+<a href="(https://zcmax.github.io/projects/LLaVA-3D/" target="_blank">
+    <img alt="Website" src="https://img.shields.io/badge/🌎_Website-LLaVA--3D-blue.svg" height="20" />
+</a>
+<a href="https://huggingface.co/datasets/ChaimZhu/LLaVA-3D-Data" target="_blank">
+    <img alt="HF Dataset: LLaVA-3D-Data" src="https://img.shields.io/badge/%F0%9F%A4%97%20_Dataset-LLaVA--3D--Data-ffc107?color=ffc107&logoColor=white" height="20" />
+</a>
+<a href="https://huggingface.co/ChaimZhu/LLaVA-3D-7B" target="_blank">
+    <img alt="HF Dataset: LLaVA-3D-7B" src="https://img.shields.io/badge/%F0%9F%A4%97%20_Model-LLaVA--3D--7B-ffc107?color=ffc107&logoColor=white" height="20" />
+</a>
+
 
 </div>
 
@@ -32,6 +43,7 @@
 LLaVA-3D could perform both 2D and 3D vision-language tasks. The left block (b) shows that compared with previous 3D LMMs, our LLaVA-3D achieves state-of-the-art performance across a wide range of 3D benchmarks while maintaining a comparable performance on various 2D benchmarks compared with LLaVA-1.5. The middle block (c) demonstrates that LLaVA-3D is built on the 2D LMM: LLaVA, and leverages 3D patches to endow it with 3D spatial awareness, enabling it to perform various 3D vision-and-language tasks in the physical world. The right blocks (d) and (e) highlights the significantly faster convergence and inference speeds of LLaVA-3D compared to existing 3D LMMs.
 
 ## 🔥 News
+- [2025-07-11] :hearts: Our paper is accepted by ICCV 2025! See u in Hawaii! We release the full `LLaVA-3D-Instruct-86OK` data on [HuggingFace](https://huggingface.co/datasets/ChaimZhu/LLaVA-3D-Data)!
 - [2024-11-29] We update the custom data instruction tuning tutorial, now you can train the model on your own dataset!
 - [2024-10-19] We release the inference codes with checkpoints as well as the image and 3D scene demos. You can chat with LLaVA-3D with your own machines.
 - [2024-09-28] We release the [paper](https://arxiv.org/abs/2409.18125) of LLaVA-3D. &#x1F389;
