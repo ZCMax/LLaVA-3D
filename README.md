@@ -1,6 +1,6 @@
 <br>
 <p align="center">
-<h1 align="center"><strong>LLaVA-3D: A Simple yet Effective Pathway to Empowering LMMs with 3D-awareness</strong></h1>
+<h1 align="center"><strong>LLaVA-3D: A Simple yet Effective Pathway to Empowering LMMs with 3D Capabilities</strong></h1>
   <p align="center">
 	<br>
     <a href='https://zcmax.github.io//' target='_blank'>Chenming Zhu</a>&emsp;
